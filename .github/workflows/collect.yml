@@ -52,4 +52,4 @@ jobs:
       #     password: ${{ secrets.GMAIL_APP_PASSWORD }}
       #     to: ${{ secrets.NOTIFY_EMAIL }}
       #     subject: "📰 介護情報ダッシュボード更新 $(date '+%Y-%m-%d')"
-      #     body: "本日の介護情報ダッシュボードが更新されました。\nhttps://YOUR-USERNAME.github.io/care-info-collector/"
+      #     body: "本日の介護情報ダッシュボードが更新されました。\nhttps://kaigen310.github.io/care-info-collector/"
