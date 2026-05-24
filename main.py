@@ -197,6 +197,30 @@ def main() -> int:
     articles = ja_articles + en_articles
     logger.info(f"言語比率: 日本語 {len(ja_articles)}件 / 英語 {len(en_articles)}件")
 
+    # 4d. 新着マーキング（前回収集済みURLとの差分で is_new フラグを設定）
+    seen_urls_path = data_dir / 'seen_urls.json'
+    if seen_urls_path.exists():
+        seen_urls: set = set(json.loads(seen_urls_path.read_text(encoding='utf-8')))
+    else:
+        seen_urls = set()
+
+    new_count = 0
+    for a in articles:
+        if a['url'] not in seen_urls:
+            a['is_new'] = True
+            new_count += 1
+        else:
+            a['is_new'] = False
+
+    # 今回の全URLを追加して保存（最大5000件でローテーション）
+    seen_urls.update(a['url'] for a in articles)
+    if len(seen_urls) > 5000:
+        seen_urls = set(list(seen_urls)[-5000:])
+    seen_urls_path.write_text(
+        json.dumps(list(seen_urls), ensure_ascii=False, indent=2), encoding='utf-8'
+    )
+    logger.info(f"新着記事: {new_count}件 / 既存: {len(articles) - new_count}件")
+
     # 5. 英語記事のタイトル・要約を日本語に翻訳
     logger.info("Step 5: Translating English articles…")
     articles = translate_articles(articles)

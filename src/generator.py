@@ -59,6 +59,8 @@ def generate_dashboard(articles: list[dict], date_str: str, output_dir: str = 'd
   --badge-week-fg: #92400e;
   --badge-old-bg:  #f3f4f6;
   --badge-old-fg:  #6b7280;
+  --badge-isnew-bg: #10b981;
+  --badge-isnew-fg: #ffffff;
 
   --radius-xs: 4px;
   --radius-sm: 6px;
@@ -574,6 +576,37 @@ button {{ font-family: var(--font); cursor: pointer; }}
 }}
 .card-title:hover {{ color: var(--accent); text-decoration: none; }}
 
+/* NEW badge */
+.is-new-badge {{
+  font-size: .68rem;
+  font-weight: 700;
+  letter-spacing: .04em;
+  background: var(--badge-isnew-bg);
+  color: var(--badge-isnew-fg);
+  padding: .15rem .45rem;
+  border-radius: var(--radius-xs);
+  flex-shrink: 0;
+}}
+
+/* New-only toggle */
+.new-toggle {{
+  padding: .3rem .8rem;
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  border: 1.5px solid var(--border);
+  color: var(--muted-dark);
+  font-size: .8rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all var(--transition);
+}}
+.new-toggle.active {{
+  background: #d1fae5;
+  border-color: #059669;
+  color: #065f46;
+}}
+
 /* Read button */
 .read-btn {{
   flex-shrink: 0;
@@ -649,7 +682,7 @@ button {{ font-family: var(--font); cursor: pointer; }}
   <div class="stat-chip">📰 合計 <strong id="statTotal">—</strong></div>
   <div class="stat-chip">🇯🇵 国内 <strong id="statJa">—</strong></div>
   <div class="stat-chip">🌐 海外 <strong id="statEn">—</strong></div>
-  <div class="stat-chip">🆕 今日 <strong id="statToday">—</strong></div>
+  <div class="stat-chip">🆕 新着 <strong id="statNew">—</strong></div>
   <div class="stats-spacer"></div>
   <div id="resultCount">表示中: <strong id="visibleCount">—</strong> 件</div>
 </div>
@@ -668,6 +701,7 @@ button {{ font-family: var(--font); cursor: pointer; }}
   </div>
   <div class="filterbar-sep" aria-hidden="true"></div>
   <div class="right-controls">
+    <button class="new-toggle" id="newToggle" aria-pressed="false">🆕 新着のみ</button>
     <label class="sr-only" for="langFilter">言語フィルター</label>
     <select class="ctrl-select" id="langFilter" aria-label="言語フィルター">
       <option value="all">🌐 全言語</option>
@@ -715,7 +749,7 @@ const CAT_META  = {cat_meta_json};
 const DEFAULT_CLR = '#6b7280';
 
 // ── State ────────────────────────────────────────────────────────
-let state = {{ period:'all', cat:'all', lang:'all', sort:'date', search:'' }};
+let state = {{ period:'all', cat:'all', lang:'all', sort:'date', search:'', newOnly:false }};
 
 // ── Utils ────────────────────────────────────────────────────────
 const esc = s => String(s)
@@ -764,6 +798,7 @@ function buildCard(a) {{
     ? '<span class="lang-badge lang-en">EN</span>'
     : '<span class="lang-badge lang-ja">JP</span>';
   const transBadge = isEn ? '<span class="trans-badge">🌐 翻訳</span>' : '';
+  const newBadge   = a.is_new ? '<span class="is-new-badge">NEW</span>' : '';
 
   const summaryBlock = displaySummary.trim().length > 30
     ? `<p class="card-summary">${{esc(displaySummary)}}</p>`
@@ -775,12 +810,14 @@ function buildCard(a) {{
   data-cats="${{esc(JSON.stringify(a.categories||[]))}}"
   data-lang="${{a.lang||'ja'}}"
   data-date="${{a.published||''}}"
+  data-isnew="${{a.is_new ? '1' : '0'}}"
   data-source="${{esc(a.source||'')}}"
   data-search="${{esc(((a.title_ja||a.title)+' '+(a.summary_ja||a.summary||'')+' '+a.source).toLowerCase())}}">
 
   <div class="card-band">
     <div class="card-cats">${{catBadgesHtml(a.categories)}}</div>
     <div class="card-meta">
+      ${{newBadge}}
       ${{ageBadgeHtml(a.published)}}
       ${{transBadge}}
       ${{langBadge}}
@@ -816,6 +853,7 @@ function buildCard(a) {{
 function filterArticles() {{
   const now = Date.now();
   return ARTICLES.filter(a => {{
+    if (state.newOnly && !a.is_new) return false;
     if (state.period !== 'all') {{
       const h = (now - parseDate(a.published)) / 3.6e6;
       if (state.period==='today' && h>48)  return false;
@@ -934,12 +972,11 @@ function renderSidebar(filtered) {{
 // ── Init ─────────────────────────────────────────────────────────
 function init() {{
   // Stats
-  const now = Date.now();
-  const todayCnt = ARTICLES.filter(a=>(now-parseDate(a.published))/3.6e6<48).length;
-  document.getElementById('statTotal').textContent   = ARTICLES.length;
-  document.getElementById('statJa').textContent      = ARTICLES.filter(a=>a.lang==='ja').length;
-  document.getElementById('statEn').textContent      = ARTICLES.filter(a=>a.lang==='en').length;
-  document.getElementById('statToday').textContent   = todayCnt;
+  const newCnt = ARTICLES.filter(a=>a.is_new).length;
+  document.getElementById('statTotal').textContent = ARTICLES.length;
+  document.getElementById('statJa').textContent    = ARTICLES.filter(a=>a.lang==='ja').length;
+  document.getElementById('statEn').textContent    = ARTICLES.filter(a=>a.lang==='en').length;
+  document.getElementById('statNew').textContent   = newCnt;
 
   // Build category chips
   const wrap = document.getElementById('catChips');
@@ -968,6 +1005,15 @@ function init() {{
     document.querySelectorAll('.cat-chip').forEach(b=>b.classList.remove('active'));
     btn.classList.add('active');
     state.cat = btn.dataset.cat;
+    render();
+  }});
+
+  // New-only toggle
+  const newToggle = document.getElementById('newToggle');
+  newToggle.addEventListener('click', () => {{
+    state.newOnly = !state.newOnly;
+    newToggle.classList.toggle('active', state.newOnly);
+    newToggle.setAttribute('aria-pressed', String(state.newOnly));
     render();
   }});
 
