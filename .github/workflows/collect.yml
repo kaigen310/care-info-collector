@@ -1,0 +1,55 @@
+name: 介護情報 日次収集
+
+on:
+  schedule:
+    # 毎朝3:00 JST = 18:00 UTC (前日)
+    - cron: '0 18 * * *'
+  workflow_dispatch:  # 手動実行も可
+
+permissions:
+  contents: write
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: リポジトリをチェックアウト
+        uses: actions/checkout@v4
+
+      - name: Python 3.11 セットアップ
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: 依存ライブラリをインストール
+        run: pip install -r requirements.txt
+
+      - name: 情報収集を実行
+        run: python main.py
+
+      - name: 変更をコミット・プッシュ
+        run: |
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add docs/ data/ collector.log
+          git diff --staged --quiet || git commit -m "📰 Daily update: $(date -u '+%Y-%m-%d')"
+          git push
+
+      # ── オプション: メール通知 ──────────────────────────────────────────
+      # 以下のステップは secrets.NOTIFY_EMAIL と secrets.GMAIL_APP_PASSWORD を
+      # リポジトリのシークレットに設定した場合のみ動作します（設定は任意）。
+      #
+      # - name: メール通知を送信
+      #   if: success()
+      #   uses: dawidd6/action-send-mail@v3
+      #   with:
+      #     server_address: smtp.gmail.com
+      #     server_port: 465
+      #     username: ${{ secrets.GMAIL_USER }}
+      #     password: ${{ secrets.GMAIL_APP_PASSWORD }}
+      #     to: ${{ secrets.NOTIFY_EMAIL }}
+      #     subject: "📰 介護情報ダッシュボード更新 $(date '+%Y-%m-%d')"
+      #     body: "本日の介護情報ダッシュボードが更新されました。\nhttps://YOUR-USERNAME.github.io/care-info-collector/"

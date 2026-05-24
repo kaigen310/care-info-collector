@@ -1,0 +1,303 @@
+# ============================================================
+#  Care Info Collector — 情報源設定
+#  国内：海外 = 8：2 の比率でスタート
+# ============================================================
+
+settings:
+  max_articles_per_feed: 12
+  summary_sentences: 4
+  days_to_keep: 30
+  max_article_age_days_care:      7    # 国内・海外ケア記事（ニュース性が高い）
+  max_article_age_days_tech:      30   # AIツール・生産性（月単位で有効）
+  max_article_age_days_lifestyle: 3650 # ストア哲学・メンタルケア（普遍的=期限なし）
+  # 国内:海外 比率調整 — 海外careフィードは上限を絞る
+  max_articles_per_feed_en_care: 3    # McKnight'sなど海外careフィードの上限（8:2比率のため3に削減）
+  max_articles_en_total: 10           # 英語記事の総数キャップ（8:2比率の最終調整）
+  output_dir: docs
+  data_dir: data
+  request_timeout: 15
+  request_delay: 0.8
+
+# ── ブロックリスト（全記事共通: 介護と無関係な突発トピック）────────
+blocklist_keywords:
+  - "エボラ"
+  - "Ebola"
+  - "ハンタウイルス"
+  - "Hantavirus"
+  - "trachoma"
+  - "smallpox"
+  - "World Health Assembly"
+  - "世界保健総会"
+  - "BDBV"
+  - "nicotine pouch"
+  - "tobacco"
+
+# ── 英語記事の関連性キーワード（content_type 別）──────────────────
+# content_type: care
+relevance_keywords_en:
+  - "care"
+  - "aging"
+  - "elderly"
+  - "senior"
+  - "nursing"
+  - "dementia"
+  - "caregiver"
+  - "long-term"
+  - "resident"
+  - "facility"
+  - "workforce"
+  - "staffing"
+  - "gerontol"
+  - "agetech"
+  - "age tech"
+  - "assisted living"
+
+# content_type: tech
+relevance_keywords_tech:
+  - "AI"
+  - "agent"
+  - "automation"
+  - "workflow"
+  - "productivity"
+  - "notion"
+  - "obsidian"
+  - "llm"
+  - "generative"
+  - "chatgpt"
+  - "claude"
+  - "copilot"
+  - "no-code"
+  - "zapier"
+  - "n8n"
+  - "make.com"
+  - "prompt"
+  - "tool"
+  - "app"
+  - "startup"
+  - "agetech"
+  - "age tech"
+  - "senior living tech"
+  - "assistive technology"
+  - "aging innovation"
+
+# content_type: lifestyle
+relevance_keywords_lifestyle:
+  - "stoic"
+  - "stoicism"
+  - "marcus aurelius"
+  - "seneca"
+  - "mindfulness"
+  - "meditation"
+  - "resilience"
+  - "self-improvement"
+  - "mental"
+  - "philosoph"        # philosophy + philosophical の両方にマッチ
+  - "journal"
+  - "burnout"
+  - "wellbeing"
+  - "habit"
+  - "focus"
+  - "deep work"
+  - "joy"              # Daily Stoicの喜び・感情テーマ
+  - "happiness"
+  - "virtue"           # ストア哲学の核心
+  - "wisdom"
+  - "adversity"        # 逆境に関するストア記事
+  - "lesson"           # life lessons テーマ
+  - "courage"
+  - "gratitude"
+  - "regret"           # "How to deal with regret" 等
+  - "meaning"
+
+# ============================================================
+#  ██████  国内情報（比率：8）
+#  役割: 実務・制度・現場のリアル
+# ============================================================
+feeds:
+
+  # ── ① 厚生労働省・制度改正 ──────────────────────────────────
+  - name: 厚生労働省 介護保険・福祉動向
+    url: https://news.google.com/rss/search?q=厚生労働省+介護保険+OR+福祉&hl=ja&gl=JP&ceid=JP:ja
+    lang: ja
+    category: 介護保険・制度
+    content_type: care
+
+  - name: 厚生労働省 報酬改定・審議会
+    url: https://news.google.com/rss/search?q=社会保障審議会+介護保険+OR+介護報酬+改定&hl=ja&gl=JP&ceid=JP:ja
+    lang: ja
+    category: 介護保険・制度
+    content_type: care
+
+  - name: 介護保険 制度改正・改革
+    url: https://news.google.com/rss/search?q=介護保険+制度改正+OR+改革+OR+見直し&hl=ja&gl=JP&ceid=JP:ja
+    lang: ja
+    category: 介護保険・制度
+    content_type: care
+
+  - name: 地域包括ケア・自治体先進事例
+    url: https://news.google.com/rss/search?q=地域包括ケア+先進+OR+自治体+取り組み&hl=ja&gl=JP&ceid=JP:ja
+    lang: ja
+    category: 介護保険・制度
+    content_type: care
+
+  # ── ② 介護ビジネスメディア（直接RSS）──────────────────────────
+  - name: 福祉新聞
+    url: https://fukushishimbun.com/feed
+    lang: ja
+    category: 福祉・社会保障
+    content_type: care
+
+  - name: JOINT 介護ニュース
+    url: https://joint-kaigo.com/feed/
+    lang: ja
+    category: 施設運営・経営
+    content_type: care
+
+  - name: ケアマネドットコム
+    url: https://www.caremanagement.jp/?rss=1
+    lang: ja
+    category: 介護保険・制度
+    content_type: care
+
+  # ── ③ 施設運営・経営 ────────────────────────────────────────
+  - name: 介護施設 運営・経営
+    url: https://news.google.com/rss/search?q=介護施設+運営+OR+経営&hl=ja&gl=JP&ceid=JP:ja
+    lang: ja
+    category: 施設運営・経営
+    content_type: care
+
+  - name: 特養・老健・グループホーム
+    url: https://news.google.com/rss/search?q=特別養護老人ホーム+OR+老健+OR+グループホーム&hl=ja&gl=JP&ceid=JP:ja
+    lang: ja
+    category: 施設運営・経営
+    content_type: care
+
+  # ── ④ 国内 介護テック ────────────────────────────────────────
+  - name: 介護テック・AI・ロボット（国内）
+    url: https://news.google.com/rss/search?q=介護+AI+OR+ロボット+OR+DX+OR+ケアテック&hl=ja&gl=JP&ceid=JP:ja
+    lang: ja
+    category: 業務改善・介護テック
+    content_type: care
+
+  - name: 介護 ICT・業務改善・見守りシステム
+    url: https://news.google.com/rss/search?q=介護+ICT+OR+業務改善+OR+見守りシステム&hl=ja&gl=JP&ceid=JP:ja
+    lang: ja
+    category: 業務改善・介護テック
+    content_type: care
+
+  # ── ⑤ 人材育成・HR ──────────────────────────────────────────
+  - name: 介護人材 採用・育成・定着
+    url: https://news.google.com/rss/search?q=介護人材+採用+OR+育成+OR+定着&hl=ja&gl=JP&ceid=JP:ja
+    lang: ja
+    category: 人材育成・HR
+    content_type: care
+
+  - name: 介護職員 処遇改善・賃上げ
+    url: https://news.google.com/rss/search?q=介護職員+処遇改善+OR+賃上げ+OR+給与&hl=ja&gl=JP&ceid=JP:ja
+    lang: ja
+    category: 人材育成・HR
+    content_type: care
+
+  - name: 外国人介護人材・特定技能
+    url: https://news.google.com/rss/search?q=介護+外国人+OR+特定技能+OR+EPA&hl=ja&gl=JP&ceid=JP:ja
+    lang: ja
+    category: 人材育成・HR
+    content_type: care
+
+  # ── ⑥ 医療・在宅 ───────────────────────────────────────────
+  - name: 在宅医療・訪問介護・地域医療
+    url: https://news.google.com/rss/search?q=在宅医療+OR+訪問介護+OR+訪問看護&hl=ja&gl=JP&ceid=JP:ja
+    lang: ja
+    category: 医療・健康
+    content_type: care
+
+  - name: 認知症 最新情報・予防・ケア
+    url: https://news.google.com/rss/search?q=認知症+最新+OR+予防+OR+ケア&hl=ja&gl=JP&ceid=JP:ja
+    lang: ja
+    category: 医療・健康
+    content_type: care
+
+  # ── ⑦ 組織・心理（国内） ──────────────────────────────────────
+  - name: 介護職 バーンアウト・職場環境・メンタル
+    url: https://news.google.com/rss/search?q=介護職+バーンアウト+OR+離職+OR+職場環境+OR+メンタル&hl=ja&gl=JP&ceid=JP:ja
+    lang: ja
+    category: 組織・心理
+    content_type: care
+
+# ============================================================
+#  ██  海外情報（比率：2）
+#  役割A: 欧米エイジテック・介護施設経営の最前線
+#  役割B: AI/生産性ツール × 介護 の掛け合わせ視点
+#  役割C: ストイック哲学・メンタルケア（発信の差別化スパイス）
+# ============================================================
+
+  # ── 役割A: 海外介護・エイジテック ──────────────────────────────
+  - name: McKnight's Long-Term Care News
+    url: https://www.mcknights.com/feed/
+    lang: en
+    category: 施設運営・経営
+    content_type: care
+
+  - name: McKnight's Senior Living
+    url: https://www.mcknightsseniorliving.com/feed/
+    lang: en
+    category: 施設運営・経営
+    content_type: care
+
+  - name: Senior Housing News
+    url: https://seniorhousingnews.com/feed/
+    lang: en
+    category: 施設運営・経営
+    content_type: care
+
+  - name: LeadingAge
+    url: https://leadingage.org/feed/
+    lang: en
+    category: 介護保険・制度
+    content_type: care
+
+  - name: AgeTech & Senior Living Innovation
+    url: https://news.google.com/rss/search?q=agetech+OR+%22age+tech%22+OR+%22senior+living+technology%22&hl=en&gl=US&ceid=US:en
+    lang: en
+    category: 海外エイジテック
+    content_type: tech
+
+  # ── 役割B: AI・生産性ツール ──────────────────────────────────
+  - name: AI Agents & Automation (Latest)
+    url: https://news.google.com/rss/search?q=%22AI+agent%22+OR+%22workflow+automation%22+OR+%22n8n%22+OR+%22make.com%22&hl=en&gl=US&ceid=US:en
+    lang: en
+    category: AIツール・生産性
+    content_type: tech
+
+  # Simon Willison: LLM/AI agent専門ブログ（entries = 自分の記事のみ・LLM特化）
+  - name: Simon Willison's LLM Notes
+    url: https://simonwillison.net/atom/entries/
+    lang: en
+    category: AIツール・生産性
+    content_type: tech
+
+  # AI News: AIニュースメディア（オープン記事）
+  - name: AI News
+    url: https://www.artificialintelligence-news.com/feed/
+    lang: en
+    category: AIツール・生産性
+    content_type: tech
+
+  - name: Notion / Obsidian / PKM Tools
+    url: https://news.google.com/rss/search?q=notion+update+OR+obsidian+OR+%22personal+knowledge+management%22&hl=en&gl=US&ceid=US:en
+    lang: en
+    category: AIツール・生産性
+    content_type: tech
+
+  # ── 役割C: ストイック哲学・メンタルケア ──────────────────────────
+  - name: Daily Stoic
+    url: https://dailystoic.com/feed/
+    lang: en
+    category: メンタル・哲学
+    content_type: lifestyle
+
+  - name: Psychology & Caregiver Wellbeing
+    url: https://news.google.com/rss/search?q=caregiver+burnout+OR+%22caregiver+wellbeing%22+OR+%22compassion+fatigue%22&hl=en&gl=US&ceid=US:en
+    lang: en
+    category: メンタル・哲学
+    content_type: lifestyle
